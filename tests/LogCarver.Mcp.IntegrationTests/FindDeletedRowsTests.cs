@@ -187,4 +187,16 @@ public class FindDeletedRowsTests(ServerFixture fixture) : IClassFixture<ServerF
         var only = Assert.Single(root.GetProperty("events").EnumerateArray());
         Assert.Equal(5, only.GetProperty("before").GetProperty("Id").GetInt32());
     }
+
+    [Fact]
+    public async Task XmlColumn_IsFlaggedForReview_NotReturnedAsGarbledText()
+    {
+        var root = await OkAsync(new() { ["table"] = "dbo.Documents" });
+
+        var only = Assert.Single(root.GetProperty("events").EnumerateArray());
+        Assert.Equal("delete", only.GetProperty("kind").GetString());
+        Assert.False(only.TryGetProperty("before", out _));
+        Assert.Contains("not implemented", only.GetProperty("note").GetString());
+        Assert.Equal(1, root.GetProperty("summary").GetProperty("needsManualReview").GetInt32());
+    }
 }

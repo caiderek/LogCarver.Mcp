@@ -43,6 +43,10 @@ public sealed class ServerFixture : IAsyncLifetime
                 (5, N'epsilon',50.75, 0xFF00, '2026-10-05T12:00:00.000');
             UPDATE dbo.Orders SET Name = N'GAMMA' WHERE Id = 3;
             DELETE dbo.Orders WHERE Id IN (2, 4, 5);
+
+            CREATE TABLE dbo.Documents (Id INT NOT NULL PRIMARY KEY, Body XML NULL);
+            INSERT dbo.Documents VALUES (1, N'<doc><title>draft</title></doc>');
+            DELETE dbo.Documents WHERE Id = 1;
             """);
 
         var transport = new StdioClientTransport(new StdioClientTransportOptions

@@ -10,7 +10,7 @@ A read-only [MCP](https://modelcontextprotocol.io) server that lets an AI assist
 
 It is a thin wrapper over the decoding engine from [LogCarver](https://github.com/caiderek/LogCarver) (MIT). Everything runs on your machine and nothing is sent anywhere.
 
-> **Status:** early (v0.1). Not published to NuGet or the MCP registry yet; build from source for now.
+> **Status:** early (v0.1). On [NuGet](https://www.nuget.org/packages/LogCarver.Mcp) and in the official MCP registry as `io.github.caiderek/logcarver-mcp`.
 
 ## What it does
 
@@ -55,11 +55,27 @@ LOGCARVER_MCP_ALLOWED_DATABASES=Sales;HR
 
 Row values come straight from the database. They are data, not instructions, and the tool description tells the model so.
 
+### Install
+
+Needs the .NET 10 SDK or runtime.
+
+```
+dotnet tool install -g LogCarver.Mcp
+```
+
+Or run it without installing, through `dnx`:
+
+```
+dotnet dnx LogCarver.Mcp --yes
+```
+
 ### Claude Code
 
 ```
 claude mcp add logcarver --env LOGCARVER_MCP_CONNECTION_STRING="Server=localhost;Database=MyDb;Integrated Security=true;TrustServerCertificate=true" -- logcarver-mcp
 ```
+
+With `dnx` instead of a global tool, end the command with `-- dotnet dnx LogCarver.Mcp --yes`.
 
 ### From source
 

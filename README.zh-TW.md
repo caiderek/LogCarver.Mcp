@@ -8,7 +8,7 @@
 
 它是 [LogCarver](https://github.com/caiderek/LogCarver)(MIT)解碼引擎外面的一層薄包裝。全部在本機執行,不會把資料送到任何地方。
 
-> **狀態:** 早期版本(v0.1)。還沒發布到 NuGet 或 MCP registry,目前請從原始碼建置。
+> **狀態:** 早期版本(v0.1)。已經上架 [NuGet](https://www.nuget.org/packages/LogCarver.Mcp),也在官方 MCP registry 裡,名稱是 `io.github.caiderek/logcarver-mcp`。
 
 ## 它做什麼
 
@@ -53,11 +53,27 @@ LOGCARVER_MCP_ALLOWED_DATABASES=Sales;HR
 
 資料列的內容是直接從資料庫讀出來的,它們是資料,不是指令,工具說明裡也有提醒模型這一點。
 
+### 安裝
+
+需要 .NET 10 SDK 或 runtime。
+
+```
+dotnet tool install -g LogCarver.Mcp
+```
+
+或是不安裝,透過 `dnx` 直接執行:
+
+```
+dotnet dnx LogCarver.Mcp --yes
+```
+
 ### Claude Code
 
 ```
 claude mcp add logcarver --env LOGCARVER_MCP_CONNECTION_STRING="Server=localhost;Database=MyDb;Integrated Security=true;TrustServerCertificate=true" -- logcarver-mcp
 ```
+
+如果用 `dnx` 而不是全域工具,指令結尾改成 `-- dotnet dnx LogCarver.Mcp --yes`。
 
 ### 從原始碼建置
 

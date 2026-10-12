@@ -1,0 +1,39 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.caiderek/logcarver-mcp",
+  "title": "LogCarver",
+  "description": "Read-only MCP server that finds deleted SQL Server rows from the transaction log (fn_dblog).",
+  "version": "0.1.0",
+  "websiteUrl": "https://caiderek.github.io/LogCarver/",
+  "repository": {
+    "url": "https://github.com/caiderek/LogCarver.Mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "nuget",
+      "identifier": "LogCarver.Mcp",
+      "version": "0.1.0",
+      "runtimeHint": "dnx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "LOGCARVER_MCP_CONNECTION_STRING",
+          "description": "SQL Server connection string. The login must be sysadmin (fn_dblog requires it). Example: Server=localhost;Database=MyDb;Integrated Security=true;TrustServerCertificate=true",
+          "format": "string",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "LOGCARVER_MCP_ALLOWED_DATABASES",
+          "description": "Optional. Extra databases the tool may read besides the one in the connection string, separated by commas or semicolons.",
+          "format": "string",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}

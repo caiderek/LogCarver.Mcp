@@ -1,8 +1,10 @@
-<p align="center"><img src="LogCarver/docs/assets/logo.png" width="96" alt="LogCarver logo"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/caiderek/LogCarver/master/docs/assets/logo.png" width="96" alt="LogCarver logo"></p>
+
+<!-- mcp-name: io.github.caiderek/logcarver-mcp -->
 
 # LogCarver.Mcp
 
-**English | [繁體中文](README.zh-TW.md)**
+**English | [繁體中文](https://github.com/caiderek/LogCarver.Mcp/blob/master/README.zh-TW.md)**
 
 A read-only [MCP](https://modelcontextprotocol.io) server that lets an AI assistant answer "what rows were just deleted from this SQL Server table?" by reading the database's transaction log (`fn_dblog`). No Audit, CDC or Change Tracking needs to be enabled beforehand.
 
@@ -78,4 +80,4 @@ The integration tests need a local SQL Server and a sysadmin Windows login. They
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](https://github.com/caiderek/LogCarver.Mcp/blob/master/LICENSE).

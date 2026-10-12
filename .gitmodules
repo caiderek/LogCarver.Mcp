@@ -1,0 +1,3 @@
+[submodule "LogCarver"]
+	path = LogCarver
+	url = https://github.com/caiderek/LogCarver.git

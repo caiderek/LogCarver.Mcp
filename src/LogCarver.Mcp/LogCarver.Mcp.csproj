@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>LogCarver.Mcp</AssemblyName>
+    <RootNamespace>LogCarver.Mcp</RootNamespace>
+
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>logcarver-mcp</ToolCommandName>
+    <PackageType>McpServer</PackageType>
+    <PackageId>LogCarver.Mcp</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Derek</Authors>
+    <Description>Read-only MCP server that recovers deleted SQL Server rows from the active transaction log (fn_dblog). No Audit/CDC/Change Tracking needed.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>mcp;modelcontextprotocol;sqlserver;transaction-log;recovery;fn_dblog</PackageTags>
+    <RepositoryUrl>https://github.com/caiderek/LogCarver.Mcp</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\LogCarver\src\LogCarver.Core\LogCarver.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Condition="Exists('..\..\README.md')" />
+    <None Include="..\..\.mcp\server.json" Pack="true" PackagePath="\.mcp\" Condition="Exists('..\..\.mcp\server.json')" />
+  </ItemGroup>
+
+</Project>

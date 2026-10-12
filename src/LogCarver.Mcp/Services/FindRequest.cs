@@ -25,7 +25,7 @@ public static partial class FindRequestParser
     public const int DefaultMaxRows = 20;
     public const int MaxRowsLimit = 500;
 
-    private const string NamePart = @"(?:\[[^\[\]\x00-\x1F]{1,128}\]|[\p{L}_][\p{L}\p{N}_@#$]{0,127})";
+    private const string NamePart = @"(?:\[[^\[\]\.\x00-\x1F]{1,128}\]|[\p{L}_][\p{L}\p{N}_@#$]{0,127})";
 
     [GeneratedRegex("^" + NamePart + @"\." + NamePart + "$")]
     private static partial Regex QualifiedTableName();
@@ -93,11 +93,12 @@ public static partial class FindRequestParser
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
-        // RoundtripKind keeps the text's own clock reading as-is: fn_dblog
-        // timestamps are the server's local time and no zone conversion is
-        // attempted, so a "Z" or offset suffix is not applied.
-        if (!DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed))
+        // fn_dblog timestamps are the server's local time and no zone
+        // conversion is attempted: take the clock reading exactly as written,
+        // ignoring any "Z" or offset suffix (DateTimeOffset.DateTime does that;
+        // parsing straight to DateTime would convert offsets to this host's zone).
+        if (!DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
             throw new ToolInputException($"'{name}' is not a valid date/time (got '{value}'). Use ISO 8601, e.g. '2026-10-12T09:30:00'.");
-        return parsed;
+        return parsed.DateTime;
     }
 }

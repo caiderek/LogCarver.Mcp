@@ -17,10 +17,10 @@
 | 參數 | 說明 |
 |---|---|
 | `table`(必填) | 要含 schema,例如 `dbo.Orders` |
-| `database` | 不給就用連線字串裡的資料庫 |
+| `database` | 不給就用連線字串裡的資料庫。其他資料庫會被拒絕,除非列在 `LOGCARVER_MCP_ALLOWED_DATABASES` |
 | `operations` | `delete`(預設)、`update`、`insert`、`all` |
 | `from`、`to` | ISO 8601 時間窗,是伺服器本地時間,不做時區轉換 |
-| `key` | `Column=Value`,只看某一列的歷史 |
+| `key` | `Column=Value`,只看某一列的歷史。欄位名稱不分大小寫;日期、bit、decimal、hex 二進位都能照平常寫法比對 |
 | `maxRows` | 預設 20,最多 500,`0` 代表只回筆數。保留最近的事件 |
 | `includeUndoSql` | 一併回傳可以還原每個事件的建議 SQL |
 
@@ -44,6 +44,14 @@ LOGCARVER_MCP_CONNECTION_STRING=Server=localhost;Database=MyDb;Integrated Securi
 ```
 
 也可以把 `LOGCARVER_MCP_CONNECTION_STRING_FILE` 指到一個存放它的檔案。
+
+這個帳號是 sysadmin,呼叫的又是 AI,所以工具預設只能讀連線字串裡的那個資料庫。要讓它讀其他的,把名稱列出來(逗號或分號分隔):
+
+```
+LOGCARVER_MCP_ALLOWED_DATABASES=Sales;HR
+```
+
+資料列的內容是直接從資料庫讀出來的,它們是資料,不是指令,工具說明裡也有提醒模型這一點。
 
 ### Claude Code
 

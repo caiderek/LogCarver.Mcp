@@ -20,7 +20,8 @@ if (string.IsNullOrWhiteSpace(connectionString))
     return 1;
 }
 
-builder.Services.AddSingleton(new ServerSettings(connectionString));
+var allowedDatabases = DatabasePolicy.ParseAllowList(builder.Configuration["LOGCARVER_MCP_ALLOWED_DATABASES"]);
+builder.Services.AddSingleton(new ServerSettings(connectionString, allowedDatabases));
 builder.Services.AddSingleton<RowHistoryService>();
 builder.Services
     .AddMcpServer()

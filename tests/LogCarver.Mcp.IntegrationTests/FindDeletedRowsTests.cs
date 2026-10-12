@@ -139,4 +139,52 @@ public class FindDeletedRowsTests(ServerFixture fixture) : IClassFixture<ServerF
         var stillThere = await OkAsync(new() { ["table"] = "dbo.Orders" });
         Assert.Equal(3, stillThere.GetProperty("summary").GetProperty("matched").GetInt32());
     }
+
+    [Fact]
+    public async Task OtherDatabase_IsRefusedUnlessTheOperatorAllowedIt()
+    {
+        var result = await CallAsync(new() { ["table"] = "dbo.Orders", ["database"] = "master" });
+
+        Assert.True(result.IsError);
+        Assert.Contains("not permitted", TextOf(result));
+        Assert.Contains("LOGCARVER_MCP_ALLOWED_DATABASES", TextOf(result));
+    }
+
+    [Fact]
+    public async Task ConfiguredDatabase_CanBeNamedExplicitly_InAnyCase()
+    {
+        var root = await OkAsync(new() { ["table"] = "dbo.Orders", ["database"] = "logcarver_mcptests" });
+
+        Assert.Equal(3, root.GetProperty("summary").GetProperty("matched").GetInt32());
+    }
+
+    [Fact]
+    public async Task UnknownKeyColumn_IsAToolError_ListingTheRealColumns()
+    {
+        var result = await CallAsync(new() { ["table"] = "dbo.Orders", ["key"] = "Nope=1" });
+
+        Assert.True(result.IsError);
+        Assert.Contains("Column 'Nope' does not exist", TextOf(result));
+        Assert.Contains("Amount", TextOf(result));
+    }
+
+    [Fact]
+    public async Task KeyColumnName_IsCaseInsensitive_AndDateTimeKeysMatch()
+    {
+        var byName = await OkAsync(new() { ["table"] = "dbo.Orders", ["key"] = "id=4" });
+        Assert.Single(byName.GetProperty("events").EnumerateArray());
+
+        var byDate = await OkAsync(new() { ["table"] = "dbo.Orders", ["key"] = "CreatedAt=2026-10-02T09:15:30.456" });
+        var only = Assert.Single(byDate.GetProperty("events").EnumerateArray());
+        Assert.Equal(2, only.GetProperty("before").GetProperty("Id").GetInt32());
+    }
+
+    [Fact]
+    public async Task BinaryKey_MatchesHex()
+    {
+        var root = await OkAsync(new() { ["table"] = "dbo.Orders", ["key"] = "Payload=0xFF00" });
+
+        var only = Assert.Single(root.GetProperty("events").EnumerateArray());
+        Assert.Equal(5, only.GetProperty("before").GetProperty("Id").GetInt32());
+    }
 }

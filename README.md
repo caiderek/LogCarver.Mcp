@@ -17,10 +17,10 @@ One tool, `find_deleted_rows`. It only runs `SELECT`s. It never changes data, an
 | Parameter | Meaning |
 |---|---|
 | `table` (required) | Schema-qualified, e.g. `dbo.Orders` |
-| `database` | Defaults to the database in the connection string |
+| `database` | Defaults to the database in the connection string. Any other database is refused unless listed in `LOGCARVER_MCP_ALLOWED_DATABASES` |
 | `operations` | `delete` (default), `update`, `insert`, `all` |
 | `from`, `to` | ISO 8601 time window, server-local time, no zone conversion |
-| `key` | `Column=Value`, return one row's history only |
+| `key` | `Column=Value`, return one row's history only. Column name is case-insensitive; dates, bit, decimals and hex binary match as you would write them |
 | `maxRows` | Default 20, max 500, `0` = counts only. The most recent events are kept |
 | `includeUndoSql` | Also return suggested SQL that would reverse each event |
 
@@ -44,6 +44,14 @@ LOGCARVER_MCP_CONNECTION_STRING=Server=localhost;Database=MyDb;Integrated Securi
 ```
 
 Or point `LOGCARVER_MCP_CONNECTION_STRING_FILE` at a file that contains it.
+
+The login is sysadmin and the caller is an AI, so the tool may only read the connection string's database. To let it read others, list them (comma or semicolon separated):
+
+```
+LOGCARVER_MCP_ALLOWED_DATABASES=Sales;HR
+```
+
+Row values come straight from the database. They are data, not instructions, and the tool description tells the model so.
 
 ### Claude Code
 

@@ -93,7 +93,9 @@ public static class ResultBuilder
         }
         if (request.KeyColumn is not null)
         {
-            int unresolvable = history.Count(e => e.Before is null && e.After is null);
+            // Only events that pass the kind/time filters could have matched the key.
+            var withoutKey = EventSelector.Select(history, request with { KeyColumn = null, KeyValue = null });
+            int unresolvable = withoutKey.Count(e => e.Before is null && e.After is null);
             if (unresolvable > 0)
                 notes.Add($"{unresolvable} other event(s) could not be decoded and so were not checked against the key filter - the row you want may be among them.");
         }
@@ -103,7 +105,9 @@ public static class ResultBuilder
         {
             notes.Add(cutBySize
                 ? $"Output was cut at about {MaxResponseChars} characters; showing the {dtos.Count} most recent of {selected.Count} matches. Narrow with from/to or key."
-                : $"Showing the {dtos.Count} most recent of {selected.Count} matches (maxRows={request.MaxRows}). Raise maxRows or narrow with from/to or key.");
+                : request.MaxRows == 0
+                    ? $"maxRows=0 returns counts only; {selected.Count} matching event(s) not shown. Raise maxRows to see them."
+                    : $"Showing the {dtos.Count} most recent of {selected.Count} matches (maxRows={request.MaxRows}). Raise maxRows or narrow with from/to or key.");
         }
 
         var byKind = history.GroupBy(e => KindName(e.Kind)).ToDictionary(g => g.Key, g => g.Count());

@@ -16,7 +16,7 @@ public static class EventSelector
                 KindMatches(e.Kind, request.Operations) &&
                 (request.From is null || e.Timestamp is null || e.Timestamp >= request.From) &&
                 (request.To is null || e.Timestamp is null || e.Timestamp <= request.To) &&
-                (request.KeyColumn is null || RowEventFilter.MatchesKey(e, request.KeyColumn, request.KeyValue!)))
+                (request.KeyColumn is null || KeyMatcher.Matches(e, request.KeyColumn, request.KeyValue!)))
             .ToList();
 
     private static bool KindMatches(RowEventKind kind, OperationFilter filter) => filter switch

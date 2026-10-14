@@ -58,7 +58,7 @@ public sealed class RowHistoryService(ServerSettings settings)
         {
             seeds = await RowImageAnchoring.BuildSeedsAsync(connection, request.Table, records, ct);
         }
-        catch (SqlException)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             seeds = new Dictionary<string, RowImageSeed>();
         }

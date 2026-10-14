@@ -10,9 +10,39 @@
 
 > **狀態:** 早期版本(v0.1)。已經上架 [NuGet](https://www.nuget.org/packages/LogCarver.Mcp),也在官方 MCP registry 裡,名稱是 `io.github.caiderek/logcarver-mcp`。
 
+## 快速開始(5 分鐘)
+
+1. **安裝**(需要 .NET 10 SDK 或 runtime):
+
+   ```
+   dotnet tool install -g LogCarver.Mcp
+   ```
+
+2. **建一個用完即丟的資料庫。** 在 SSMS 或 `sqlcmd` 執行 [`examples/try-it.sql`](examples/try-it.sql)。它會建立 `McpTest`、插入 10 筆訂單、刪 4 筆、改 1 筆。
+
+3. **密碼不要寫在指令裡。** 把連線字串放進一個只有你自己看得到的檔案(SQL 登入帳號要是 sysadmin):
+
+   ```
+   Server=localhost;Database=McpTest;User Id=你的帳號;Password=你的密碼;TrustServerCertificate=true
+   ```
+
+   存成例如 `C:\Users\你\logcarver-mcp.conn`(只有這一行,不要有其他內容)。然後加進 Claude Code,並指向這個檔案:
+
+   ```
+   claude mcp add --scope user logcarver --env LOGCARVER_MCP_CONNECTION_STRING_FILE="C:\Users\你\logcarver-mcp.conn" -- logcarver-mcp
+   ```
+
+   這樣密碼不會出現在指令列,也不會寫進 MCP 設定。這個檔案不要 commit 到任何地方。
+
+4. **開新對話問:**「McpTest 的 dbo.Orders 被刪了哪些資料?」應該看到 Bob、Carol、Dave、Eve(Id 2 到 5)。再試「看 Id=1 的歷史」和「附上還原 SQL」。
+
+5. **清掉:** `DROP DATABASE McpTest;`、`claude mcp remove logcarver`。
+
+如果結果是空的,多半是記錄檔空間已經被重複使用(例如 SIMPLE 模式下做過 `CHECKPOINT`,或備份過記錄檔)。見下面的限制。
+
 ## 它做什麼
 
-只有一個 tool:`find_deleted_rows`。它只會執行 `SELECT`,不會改任何資料。選用的還原 SQL 只是一段文字,工具本身不會去執行。
+只有一個 tool:`find_deleted_rows`。它只會讀取:執行 `SELECT`,以及用 `DBCC PAGE` 讀資料頁(用來還原 INSERT 已不在記錄檔裡的資料列),不會改任何資料。選用的還原 SQL 只是一段文字,工具本身不會去執行。
 
 | 參數 | 說明 |
 |---|---|

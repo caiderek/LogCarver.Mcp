@@ -12,9 +12,39 @@ It is a thin wrapper over the decoding engine from [LogCarver](https://github.co
 
 > **Status:** early (v0.1). On [NuGet](https://www.nuget.org/packages/LogCarver.Mcp) and in the official MCP registry as `io.github.caiderek/logcarver-mcp`.
 
+## Quick start (5 minutes)
+
+1. **Install** (needs the .NET 10 SDK or runtime):
+
+   ```
+   dotnet tool install -g LogCarver.Mcp
+   ```
+
+2. **Make a throwaway database.** Run [`examples/try-it.sql`](examples/try-it.sql) in SSMS or `sqlcmd`. It creates `McpTest`, inserts 10 orders, deletes 4 and updates 1.
+
+3. **Keep the password out of the command.** Put the connection string in a file that only you can read (the SQL login must be sysadmin):
+
+   ```
+   Server=localhost;Database=McpTest;User Id=YOUR_LOGIN;Password=YOUR_PASSWORD;TrustServerCertificate=true
+   ```
+
+   Save it as, for example, `C:\Users\you\logcarver-mcp.conn` (one line, nothing else). Then add the server and point it at the file:
+
+   ```
+   claude mcp add --scope user logcarver --env LOGCARVER_MCP_CONNECTION_STRING_FILE="C:\Users\you\logcarver-mcp.conn" -- logcarver-mcp
+   ```
+
+   The password is never typed on the command line and never appears in the MCP configuration. Do not commit this file anywhere.
+
+4. **Ask in a new conversation:** "Which rows were deleted from dbo.Orders in McpTest?" You should see Bob, Carol, Dave and Eve (Id 2 to 5). Then try "Show the history of Id=1" (Amount 100.00 to 111.11, Note first to changed) and "Include the undo SQL".
+
+5. **Clean up:** `DROP DATABASE McpTest;`, `claude mcp remove logcarver`.
+
+If the result is empty, the log space was probably reused (for example after a `CHECKPOINT` under SIMPLE recovery, or a log backup). See the limits below.
+
 ## What it does
 
-One tool, `find_deleted_rows`. It only runs `SELECT`s. It never changes data, and the optional undo SQL is plain text that the tool never executes.
+One tool, `find_deleted_rows`. It only reads: `SELECT`s, and `DBCC PAGE` reads of data pages to rebuild rows whose INSERT has left the log. It never changes data, and the optional undo SQL is plain text that the tool never executes.
 
 | Parameter | Meaning |
 |---|---|

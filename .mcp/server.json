@@ -3,7 +3,7 @@
   "name": "io.github.caiderek/logcarver-mcp",
   "title": "LogCarver",
   "description": "Read-only MCP server that finds deleted SQL Server rows from the transaction log (fn_dblog).",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "websiteUrl": "https://caiderek.github.io/LogCarver/",
   "repository": {
     "url": "https://github.com/caiderek/LogCarver.Mcp",
@@ -13,7 +13,7 @@
     {
       "registryType": "nuget",
       "identifier": "LogCarver.Mcp",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "runtimeHint": "dnx",
       "transport": {
         "type": "stdio"

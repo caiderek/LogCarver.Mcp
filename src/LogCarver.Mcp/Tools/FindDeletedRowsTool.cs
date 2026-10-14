@@ -17,7 +17,7 @@ public sealed class FindDeletedRowsTool(RowHistoryService service)
         "Finds rows that were deleted (optionally also inserted or updated) from one SQL Server table by reading the " +
         "database's active transaction log (fn_dblog), and decodes them back into column values. Use it when someone " +
         "asks what was deleted or changed and there is no backup, CDC or audit to ask. Read-only: it only runs SELECTs " +
-        "and never modifies data; the optional undo SQL is suggestion text that this tool never executes. " +
+        "and DBCC PAGE reads of data pages, and never modifies data; the optional undo SQL is suggestion text that this tool never executes. " +
         "Returns a JSON summary (counts, warnings, notes) plus the most recent matching events, up to maxRows. " +
         "Limits: only history still in the active log is visible (an empty result usually means the log space was reused); " +
         "TRUNCATE and DROP are not recoverable; compressed tables are refused; time/xml columns and off-row LOB values are " +

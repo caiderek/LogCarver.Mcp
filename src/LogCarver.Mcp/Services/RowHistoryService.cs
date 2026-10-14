@@ -11,7 +11,7 @@ public sealed class RowHistoryService(ServerSettings settings)
     /// <summary>
     /// Mirrors the LogCarver CLI's default listing path: reconstruct over the
     /// table's full observed history, then filter what is reported. Only
-    /// SELECTs are issued - nothing is ever written to the server.
+    /// SELECTs and DBCC PAGE reads are issued - nothing is ever written to the server.
     /// </summary>
     public async Task<FindResult> FindAsync(FindRequest request, CancellationToken ct)
     {
@@ -50,8 +50,21 @@ public sealed class RowHistoryService(ServerSettings settings)
         var transactionTimes = await TransactionTimeReader.GetTransactionBeginTimesAsync(connection, ct);
         var records = await FnDblogReader.ReadClusteredRecordsAsync(connection, request.Table, ct);
 
+        // An UPDATE of a row whose INSERT has left the log can only be decoded
+        // from the row's image after its last change (the data page, or a later
+        // DELETE). Failing to obtain one only means those updates stay flagged.
+        IReadOnlyDictionary<string, RowImageSeed> seeds;
+        try
+        {
+            seeds = await RowImageAnchoring.BuildSeedsAsync(connection, request.Table, records, ct);
+        }
+        catch (SqlException)
+        {
+            seeds = new Dictionary<string, RowImageSeed>();
+        }
+
         var history = RowHistoryReconstructor.Reconstruct(
-            records, schema, boundaries.Select(b => b.Lsn).ToList(), transactionTimes);
+            records, schema, boundaries.Select(b => b.Lsn).ToList(), transactionTimes, seeds);
 
         var context = new HistoryContext(
             request.Table, string.IsNullOrEmpty(builder.InitialCatalog) ? null : builder.InitialCatalog, version.ProductVersion, version.IsValidated, boundaries.Count,

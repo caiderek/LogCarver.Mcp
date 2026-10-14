@@ -71,6 +71,21 @@ public class FindDeletedRowsTests(ServerFixture fixture) : IClassFixture<ServerF
     }
 
     [Fact]
+    public async Task IncludeUndoSql_ForAnUpdate_IsColumnLevelAndFoundByTheKey()
+    {
+        // Name was changed 'gamma' -> 'GAMMA' on Id = 3. The undo sets only
+        // Name and finds the row by its key, so another writer changing some
+        // other column of the row since then does not defeat it.
+        var root = await OkAsync(new()
+        {
+            ["table"] = "dbo.Orders", ["operations"] = "update", ["key"] = "Id=3", ["includeUndoSql"] = true,
+        });
+
+        string undo = Assert.Single(root.GetProperty("events").EnumerateArray()).GetProperty("undoSql").GetString()!;
+        Assert.Equal("UPDATE [dbo].[Orders] SET [Name] = N'gamma' WHERE [Id] = 3 AND [Name] = N'GAMMA';", undo);
+    }
+
+    [Fact]
     public async Task KeyFilter_ReturnsOnlyThatRow()
     {
         var root = await OkAsync(new() { ["table"] = "dbo.Orders", ["key"] = "Id=4" });

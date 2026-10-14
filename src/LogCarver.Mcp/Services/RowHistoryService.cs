@@ -66,9 +66,10 @@ public sealed class RowHistoryService(ServerSettings settings)
         var history = RowHistoryReconstructor.Reconstruct(
             records, schema, boundaries.Select(b => b.Lsn).ToList(), transactionTimes, seeds);
 
+        var keyColumns = await KeyColumnReader.GetKeyColumnsAsync(connection, request.Table, ct);
         var context = new HistoryContext(
             request.Table, string.IsNullOrEmpty(builder.InitialCatalog) ? null : builder.InitialCatalog, version.ProductVersion, version.IsValidated, boundaries.Count,
-            boundaries.Select(b => b.TransactionName ?? "unnamed transaction").Distinct().Take(5).ToList());
+            boundaries.Select(b => b.TransactionName ?? "unnamed transaction").Distinct().Take(5).ToList(), keyColumns);
         return ResultBuilder.Build(history, request, context);
     }
 }

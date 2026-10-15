@@ -12,7 +12,7 @@
     <ToolCommandName>logcarver-mcp</ToolCommandName>
     <PackageType>McpServer</PackageType>
     <PackageId>LogCarver.Mcp</PackageId>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <Authors>Derek</Authors>
     <Description>Read-only MCP server that recovers deleted SQL Server rows from the active transaction log (fn_dblog). No Audit/CDC/Change Tracking needed.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

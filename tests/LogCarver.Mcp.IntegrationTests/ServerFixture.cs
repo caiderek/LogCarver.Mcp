@@ -47,6 +47,10 @@ public sealed class ServerFixture : IAsyncLifetime
             CREATE TABLE dbo.Documents (Id INT NOT NULL PRIMARY KEY, Body XML NULL);
             INSERT dbo.Documents VALUES (1, N'<doc><title>draft</title></doc>');
             DELETE dbo.Documents WHERE Id = 1;
+
+            CREATE TABLE dbo.Tickets (Id INT IDENTITY(1,1) NOT NULL PRIMARY KEY, Title NVARCHAR(50) NOT NULL);
+            INSERT dbo.Tickets (Title) VALUES (N'one'), (N'二'), (N'three');
+            DELETE dbo.Tickets WHERE Id = 2;
             """);
 
         var transport = new StdioClientTransport(new StdioClientTransportOptions

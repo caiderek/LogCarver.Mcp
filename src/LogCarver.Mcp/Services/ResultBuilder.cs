@@ -9,7 +9,8 @@ namespace LogCarver.Mcp.Services;
 public sealed record HistoryContext(
     string Table, string? Database, string SqlServerVersion, bool VersionValidated, int DdlBoundaryCount,
     IReadOnlyList<string>? DdlBoundaryNames = null,
-    IReadOnlyList<string>? KeyColumns = null);
+    IReadOnlyList<string>? KeyColumns = null,
+    string? IdentityColumn = null);
 
 public sealed record FindSummary(
     string Table,
@@ -65,7 +66,7 @@ public static class ResultBuilder
         bool cutBySize = false;
         for (int i = window.Count - 1; i >= 0; i--)
         {
-            var dto = ToDto(window[i], request, context.Table, context.KeyColumns);
+            var dto = ToDto(window[i], request, context.Table, context.KeyColumns, context.IdentityColumn);
             int size = JsonSerializer.Serialize(dto, JsonOptions).Length;
             if (dtos.Count > 0 && chars + size > MaxResponseChars)
             {
@@ -121,13 +122,13 @@ public static class ResultBuilder
 
     public static string ToJson(FindResult result) => JsonSerializer.Serialize(result, JsonOptions);
 
-    private static FindEventDto ToDto(RowEvent e, FindRequest request, string table, IReadOnlyList<string>? keyColumns)
+    private static FindEventDto ToDto(RowEvent e, FindRequest request, string table, IReadOnlyList<string>? keyColumns, string? identityColumn = null)
     {
         string? undo = null;
         string? note = e.Note;
         if (request.IncludeUndoSql)
         {
-            undo = UndoSqlGenerator.Generate(e, table, keyColumns: keyColumns);
+            undo = UndoSqlGenerator.Generate(e, table, identityColumn, keyColumns);
             if (undo is not null && undo.Length > MaxUndoSqlChars)
             {
                 note = (note is null ? "" : note + "; ") + $"undo SQL omitted ({undo.Length} characters is too large to return inline)";

@@ -86,6 +86,19 @@ public class FindDeletedRowsTests(ServerFixture fixture) : IClassFixture<ServerF
     }
 
     [Fact]
+    public async Task IncludeUndoSql_ForADeletedRowOfAnIdentityTable_RestoresTheOriginalIdentityValue()
+    {
+        // Without SET IDENTITY_INSERT the INSERT either fails or hands the row a
+        // new identity value; the schema's IDENTITY column has to reach the generator.
+        var root = await OkAsync(new() { ["table"] = "dbo.Tickets", ["includeUndoSql"] = true });
+
+        string undo = Assert.Single(root.GetProperty("events").EnumerateArray()).GetProperty("undoSql").GetString()!;
+        Assert.Equal(
+            "SET IDENTITY_INSERT [dbo].[Tickets] ON; INSERT INTO [dbo].[Tickets] ([Id], [Title]) VALUES (2, N'二'); SET IDENTITY_INSERT [dbo].[Tickets] OFF;",
+            undo);
+    }
+
+    [Fact]
     public async Task KeyFilter_ReturnsOnlyThatRow()
     {
         var root = await OkAsync(new() { ["table"] = "dbo.Orders", ["key"] = "Id=4" });

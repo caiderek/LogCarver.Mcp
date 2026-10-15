@@ -108,4 +108,27 @@ public class UndoSqlEscapingTests
         Assert.Contains("x''); DROP TABLE dbo.T;--", undo);
         Assert.DoesNotContain("'x'); DROP", undo);
     }
+
+    [Fact]
+    public void DeleteOnAnIdentityTable_PutsTheRowBackWithItsOriginalIdentityValue()
+    {
+        var evt = Events.Make(RowEventKind.Delete, 1, before: new() { ["Id"] = 7, ["Name"] = "x" });
+
+        var result = ResultBuilder.Build([evt], Events.Request(undo: true),
+            new HistoryContext("dbo.T", "Db", "17.0", true, 0, IdentityColumn: "Id"));
+
+        string undo = result.Events[0].UndoSql!;
+        Assert.Contains("SET IDENTITY_INSERT [dbo].[T] ON", undo);
+        Assert.Contains("SET IDENTITY_INSERT [dbo].[T] OFF", undo);
+    }
+
+    [Fact]
+    public void DeleteOnATableWithoutIdentity_IsAPlainInsert()
+    {
+        var evt = Events.Make(RowEventKind.Delete, 1, before: new() { ["Id"] = 7, ["Name"] = "x" });
+
+        var result = ResultBuilder.Build([evt], Events.Request(undo: true), new HistoryContext("dbo.T", "Db", "17.0", true, 0));
+
+        Assert.DoesNotContain("IDENTITY_INSERT", result.Events[0].UndoSql!);
+    }
 }

@@ -69,7 +69,10 @@ public sealed class RowHistoryService(ServerSettings settings)
         var keyColumns = await KeyColumnReader.GetKeyColumnsAsync(connection, request.Table, ct);
         var context = new HistoryContext(
             request.Table, string.IsNullOrEmpty(builder.InitialCatalog) ? null : builder.InitialCatalog, version.ProductVersion, version.IsValidated, boundaries.Count,
-            boundaries.Select(b => b.TransactionName ?? "unnamed transaction").Distinct().Take(5).ToList(), keyColumns);
+            boundaries.Select(b => b.TransactionName ?? "unnamed transaction").Distinct().Take(5).ToList(), keyColumns,
+            // Putting a deleted row back into an IDENTITY table needs SET IDENTITY_INSERT to restore
+            // its original value; the undo SQL generator only does that when it knows the column.
+            schema.FirstOrDefault(c => c.IsIdentity)?.Name);
         return ResultBuilder.Build(history, request, context);
     }
 }
